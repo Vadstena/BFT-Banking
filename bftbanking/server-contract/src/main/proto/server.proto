@@ -1,0 +1,223 @@
+//
+// Protocol buffers definition
+//
+syntax = "proto3";
+package pt.ulisboa.tecnico.sec.server.grpc;
+
+option java_multiple_files = true;
+
+message OpenAccountRequest {
+	message Data {
+		bytes key = 1;
+		int64 nonce = 2;
+		int64 timestamp = 3;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	int64 proofOfWork = 3;
+}
+
+message SendAmountRequest {
+	message Data {
+		bytes srcKey = 1;
+		bytes destKey = 2;
+		int32 amount = 3;
+		int64 nonce = 4;
+		int64 timestamp = 5;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	int64 proofOfWork = 3;
+}
+
+message ReceiveAmountRequest {
+	message Data {
+		bytes accKey = 1;
+		int64 TID = 2;
+		int64 nonce = 3;
+		int64 timestamp = 4;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	int64 proofOfWork = 3;
+}
+
+message TimestampRequest {
+	message Data {
+		bytes accKey = 1;
+		int64 nonce = 2;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message TimestampResponse {
+	message Data {
+		int64 value = 1;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+
+// had to change this in order to be able to compile after removing key hashes
+message TransactionMessage {
+	bytes srcKey = 1;
+	bytes destKey = 2;
+	int64 amount = 3;
+	optional int64 id = 4;
+}
+
+message AuditRequest {
+	message Data{
+		bytes accKey = 1;
+		int64 nonce = 2;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message AuditResponse {
+	message Data{
+		repeated TransactionMessage transactions = 1;
+		int64 timestamp = 2;
+	}
+	Data data = 1;
+	bytes signature =2;
+	bytes key = 3;
+}
+
+message CheckAccountRequest {
+	message Data {
+		bytes accKey = 1;
+		int64 nonce = 2;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message WriteBackCheckAccountRequest {
+	message Data {
+		bytes key = 1;
+		repeated TransactionMessage transactions = 2;
+		int64 timestamp = 3;
+		int64 nonce = 4;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message WriteBackAuditRequest {
+	message Data {
+		bytes key = 1;
+		int64 balance = 2;
+		repeated TransactionMessage transactions = 3;
+		int64 timestamp = 4;
+		int64 nonce = 5;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message CheckAccountResponse {
+	message Data {
+		int64 balance = 1;
+		repeated TransactionMessage transactions = 2;
+		int64 timestamp = 3;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	bytes key = 3;
+}
+
+message SendAmountResponse {
+	message Data {
+		int64 tID = 1;
+		int64 timestamp = 2;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	bytes key = 3;
+}
+
+message StatusResponse {
+	message Data {
+		bool value = 1;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message NonceRequest {
+	message Data {
+		bytes accKey = 1;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message NonceResponse {
+	message Data {
+		int64 value = 1;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message PublicKeyRequest {
+	int64 accountID = 1;
+}
+
+message PublicKeyResponse {
+	message Data {
+		bytes publicKey = 1;
+	}
+	Data data = 1;
+	bytes signature = 2;
+}
+
+message ServerKeyResponse {
+	bytes publicKey =1;
+	}
+
+message OpenAccountResponse {
+	message Data {
+		int64 accountID = 1;
+		int64 timestamp = 2;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	bytes key = 3;
+}
+
+message ServerKeyRequest {
+	int32 a = 1;
+	}
+
+message ReceiveAmountResponse {
+	message Data {
+		int32 amount = 1;
+		int64 timestamp = 2;
+	}
+	Data data = 1;
+	bytes signature = 2;
+	bytes key = 3;
+}
+
+message Empty{
+
+}
+
+service ServerService {
+	rpc openAccount(OpenAccountRequest) returns (OpenAccountResponse);
+	rpc sendAmount(SendAmountRequest) returns (SendAmountResponse);
+	rpc checkAccount(CheckAccountRequest) returns (CheckAccountResponse);
+	rpc receiveAmount(ReceiveAmountRequest) returns (ReceiveAmountResponse);
+	rpc audit(AuditRequest) returns (AuditResponse);
+	rpc generateNonce(NonceRequest) returns (NonceResponse);
+	rpc getPublicKeyByID(PublicKeyRequest) returns (PublicKeyResponse);
+	rpc getTimestamp(TimestampRequest) returns (TimestampResponse);
+	rpc writeBackCheckAccount(WriteBackCheckAccountRequest) returns (Empty);
+	rpc writeBackAudit(WriteBackAuditRequest) returns (Empty);
+	rpc getServerKey(ServerKeyRequest) returns (ServerKeyResponse);
+}
